@@ -1,0 +1,21 @@
+.s {
+    background-color: black;
+}
+.w { background: black; }
+.b { background: blue; }
+.p { background: lightgray; }
+.a { background: red; }
+.y, .Y { background: red; }
+
+.field div {
+	width: 20px;
+    height: 20px;
+    float: left;
+    border: 1px solid #D6D6D6;
+}
+#usr {width: 220px; height: 220px; border: thin solid #D6D6D6;float: left;margin:30px;}
+#comp {width: 220px; height: 220px; border: thin solid #D6D6D6;float: left;margin:30px;}
+.main {width: 100%;}
+
+
+
