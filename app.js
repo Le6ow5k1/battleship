@@ -1,8 +1,9 @@
-var _ = require('lodash');
+//var _ = require('lodash');
 
 
-var userField = document.getElementsById('usr');
-var compField = document.getElementsById('comp');
+var userField = document.getElementById('usr');
+var compField = document.getElementById('comp');
+// userField.addEventListener('click');
 
 //
 function Game(numRows, numCols) {
@@ -17,6 +18,7 @@ function Game(numRows, numCols) {
                     ['nfnnnnnnnn'],
                     ['nnnonnnfno'],
                     ['oooonfnnno']];
+    // Эти поля являются массивами с div элементами
     this.userField = new Field(userField).draw(testGrid);
     this.compField = new Field(compField).draw(testGrid);
     // this.isOver = false;
@@ -33,7 +35,7 @@ Game.prototype.getCompField = function() {
 };
 
 Game.prototype.isOver = function() {
-    return (userField.check() || compField.check());
+    return !(userField.check() || compField.check());
 };
 
 function Field(field) {
@@ -45,22 +47,23 @@ function Field(field) {
     //   'o' - свободная не простреленная клетка
     //   'p' - свободная простреленная клетка
     this.draw = function(grid) {
-        grid.map(function(row) {
-            row.map(function(el) {
+        for (var y=0; y < grid.length; y++) {
+            for (var x=0; x < grid[y].length; x++) {
                 var div = document.createElement('div');
-                div.className = y.toString()+'_'+x.toString()+' '+el;
+                div.className = y.toString()+'_'+x.toString()+' '+grid[y][x];
                 field.appendChild(div);
-                return div;
-            });
-        });
+            }
+        }
     };
+
+    this.getField = field;
 
     // Проверяет остались ли еще корабли
     this.check = function() {
-        field.some(function(row) {
-            return row.some(function(el) {
-                return (el.className.indexOf(' f') !== -1);
-            });
+        var htmlCollection = field.children;
+        var arr = Array.prototype.slice.call(htmlCollection);
+        return arr.some(function(el) {
+            return (el.className.indexOf(' f') !== -1);
         });
     };
 }
@@ -95,24 +98,24 @@ function Elements() {
 
 Elements.prototype.getSingles = function() {
     var res = [null,null,null,null];
-    return res.map(function(el) { return this.single[0]; });
+    return res.forEach(function(el) { return this.single[0]; });
 };
 
 Elements.prototype.getTwos = function() {
     var res = [null,null,null];
     var max = this.twos.length - 1;
-    return res.map(function(el) {
+    return res.forEach(function(el) {
         var randInd = randomInt(0, max);
-        return res.map(function() { return this.twos[randInd]; });
+        return res.forEach(function() { return this.twos[randInd]; });
     });
 };
 
 Elements.prototype.getThrees = function() {
     var res = [null,null];
     var max = this.threes.length - 1;
-    return res.map(function(el) {
+    return res.forEach(function(el) {
         var randInd = randomInt(0, max);
-        return res.map(function() { return this.twos[randInd]; });
+        return res.forEach(function() { return this.twos[randInd]; });
     });
 };
 Elements.prototype.getFours = function() {
