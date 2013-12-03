@@ -7,8 +7,18 @@ var compField = document.getElementsById('comp');
 //
 function Game(numRows, numCols) {
     var grid = new Grid(numRows, numCols);
-    this.userField = new Field(userField).draw(grid);
-    this.compField = new Field(compField).draw(grid);
+    var testGrid = [['nnnnnnoonf'],
+                    ['nffnfnoonn'],
+                    ['nnnnfnnnnn'],
+                    ['nnnnnnfffn'],
+                    ['nfffnnfnnn'],
+                    ['nnnnnnnnnn'],
+                    ['nnnfffnffn'],
+                    ['nfnnnnnnnn'],
+                    ['nnnonnnfno'],
+                    ['oooonfnnno']];
+    this.userField = new Field(userField).draw(testGrid);
+    this.compField = new Field(compField).draw(testGrid);
     // this.isOver = false;
 }
 
@@ -23,7 +33,7 @@ Game.prototype.getCompField = function() {
 };
 
 Game.prototype.isOver = function() {
-    
+    return (userField.check() || compField.check());
 };
 
 function Field(field) {
