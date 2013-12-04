@@ -1,20 +1,18 @@
-.s {
-    background-color: black;
-}
-.w { background: black; }
-.b { background: blue; }
-.p { background: lightgray; }
-.a { background: red; }
-.y, .Y { background: red; }
+.s { border: 1px solid black; }
+.o { border: 1px solid black; }
+.p { border: 1px solid black; background-color: aqua;}
+.x { border: 1px solid black; background-color: lime;}
+.f { border: 1px solid black; background-color: grey;}
+.n { border: 1px solid black;}
 
 .field div {
 	width: 20px;
     height: 20px;
     float: left;
-    border: 1px solid #D6D6D6;
+    margin: 0px;
 }
-#usr {width: 220px; height: 220px; border: thin solid #D6D6D6;float: left;margin:30px;}
-#comp {width: 220px; height: 220px; border: thin solid #D6D6D6;float: left;margin:30px;}
+#usr {width: 220px; height: 220px; float: left;margin:30px;border: 1px solid black;}
+#comp {width: 220px; height: 220px;float: left;margin:30px;border: 1px solid black;}
 .main {width: 100%;}
 
 

@@ -1,38 +1,29 @@
-//var _ = require('lodash');
-
-
 var userField = document.getElementById('usr');
 var compField = document.getElementById('comp');
-// userField.addEventListener('click');
 
-//
+
 function Game(numRows, numCols) {
     var grid = new Grid(numRows, numCols);
-    var testGrid = [['nnnnnnoonf'],
-                    ['nffnfnoonn'],
-                    ['nnnnfnnnnn'],
-                    ['nnnnnnfffn'],
-                    ['nfffnnfnnn'],
-                    ['nnnnnnnnnn'],
-                    ['nnnfffnffn'],
-                    ['nfnnnnnnnn'],
-                    ['nnnonnnfno'],
-                    ['oooonfnnno']];
-    // Эти поля являются массивами с div элементами
-    this.userField = new Field(userField).draw(testGrid);
-    this.compField = new Field(compField).draw(testGrid);
-    // this.isOver = false;
+    var testGrid = ['nnnnnnoonf',
+                    'nffnfnoonn',
+                    'nnnnfnnnnn',
+                    'nnnnnnfffn',
+                    'nfffnnfnnn',
+                    'nnnnnnnnnn',
+                    'nnnfffnffn',
+                    'nfnnnnnnnn',
+                    'nnnonnnfno',
+                    'oooonfnnno'];
+
+    this.userField = new Field(userField);
+    this.userField.draw(testGrid);
+    this.compField = new Field(compField);
+    this.compField.draw(testGrid);
 }
 
 var game = new Game(10, 10);
 
-Game.prototype.getUserField = function() {
-    return userField;
-};
-
-Game.prototype.getCompField = function() {
-    return compField;
-};
+compField.addEventListener('click', game.compField.shoot);
 
 Game.prototype.isOver = function() {
     return !(userField.check() || compField.check());
@@ -65,6 +56,25 @@ function Field(field) {
         return arr.some(function(el) {
             return (el.className.indexOf(' f') !== -1);
         });
+    };
+
+    // Обработчик события по клику на определенную клетку
+    // Изменяет тип клетки
+    this.shoot = function(event) {
+        var cell = event.target;
+        switch (cell.className[4]) {
+            case 'f':
+                cell.className = replaceCharAt(cell.className, 4, 'x');
+                break;
+            case 'o':
+                cell.className = replaceCharAt(cell.className, 4, 'p');
+                break;
+            case 'n':
+                cell.className = replaceCharAt(cell.className, 4, 'p');
+                break;
+            default:
+                return 0;
+        }
     };
 }
 
@@ -105,8 +115,8 @@ Elements.prototype.getTwos = function() {
     var res = [null,null,null];
     var max = this.twos.length - 1;
     return res.forEach(function(el) {
-        var randInd = randomInt(0, max);
-        return res.forEach(function() { return this.twos[randInd]; });
+        var randIndx = randomInt(0, max);
+        return res.forEach(function() { return this.twos[randIndx]; });
     });
 };
 
@@ -114,44 +124,48 @@ Elements.prototype.getThrees = function() {
     var res = [null,null];
     var max = this.threes.length - 1;
     return res.forEach(function(el) {
-        var randInd = randomInt(0, max);
-        return res.forEach(function() { return this.twos[randInd]; });
+        var randIndx = randomInt(0, max);
+        return res.forEach(function() { return this.twos[randIndx]; });
     });
 };
 Elements.prototype.getFours = function() {
     var max = this.fours.length - 1;
-    var randInd = randomInt(0, max);
-    return [this.fours[randInd]];
+    var randIndx = randomInt(0, max);
+    return [this.fours[randIndx]];
 };
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max-min+1) + min);
 }
 
+function replaceCharAt(str, index, character) {
+    return str.substr(0, index) + character + str.substr(index+character.length);
+}
+
 // Находит место для расположения корабля и возвращает x,y координаты начальной точки
 // для "вставки" данного корабля
 function findPlaceForShip(grid, elem) {
-    var start_ind = null;
+    var start_indx = null;
 
     rep:
     for (var i=0; i < grid.length-elem.length+1; i++) {
         for (var j=0; j < elem.length; j++) {
-            start_ind = findPlaceInRow(grid[i+j],elem[j], start_ind);
-            if (start_ind===false) {
+            start_indx = findPlaceInRow(grid[i+j],elem[j], start_indx);
+            if (start_indx===false) {
                 continue rep;
             }
         }
-        return [i, start_ind];
+        return [i, start_indx];
     }
     return false;
 }
 
 // Определяет есть ли в строке сетки место для расположения "строчки" данного корабля,
 // если есть, то функция возвращяет индекс с которого начинается свободное место, иначе false.
-// Можно указать индекс с которого начинать проверку - start_ind.
-function findPlaceInRow(rowGrid, rowElem, start_ind) {
+// Можно указать индекс с которого начинать проверку - start_indx.
+function findPlaceInRow(rowGrid, rowElem, start_indx) {
     var start = 0;
-    if (start_ind) { start = start_ind; }
+    if (start_indx) { start = start_indx; }
 
     rep:
     for (var i=start; i < rowGrid.length-rowElem.length+1; i++) {
