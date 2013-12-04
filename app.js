@@ -14,8 +14,10 @@ function Game(numRows, numCols) {
                     'nfnnnnnnnn',
                     'nnnonnnfno',
                     'oooonfnnno'];
+    console.log(grid);
 
     this.userField = new Field(userField);
+    console.log(this.userField);
     this.userField.draw(testGrid);
     this.compField = new Field(compField);
     this.compField.draw(testGrid);
@@ -30,15 +32,18 @@ Game.prototype.isOver = function() {
 };
 
 function Field(field) {
+
     // Создает игровое поле, которое представляет собой сетку из клеток
     // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
-    // где y - у-координата клетки, х - х-координата, а i - тип клетки:\
+    // где y - у-координата клетки, х - х-координата, а i - тип клетки
     //   'f' - неповрежденная часть корабля
     //   'x' - поврежденная часть корабля
     //   'o' - свободная не простреленная клетка
     //   'p' - свободная простреленная клетка
+
     this.draw = function(grid) {
         for (var y=0; y < grid.length; y++) {
+            // console.log(field);
             for (var x=0; x < grid[y].length; x++) {
                 var div = document.createElement('div');
                 div.className = y.toString()+'_'+x.toString()+' '+grid[y][x];
@@ -47,7 +52,6 @@ function Field(field) {
         }
     };
 
-    this.getField = field;
 
     // Проверяет остались ли еще корабли
     this.check = function() {
@@ -88,7 +92,7 @@ function Grid(numRows, numCols) {
         grid[y] = row;
     }
 
-    this.get = grid;
+    return grid;
 }
 
 // Все возможные корабли
