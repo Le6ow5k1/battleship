@@ -17,7 +17,6 @@ function Game(numRows, numCols) {
     console.log(grid);
 
     this.userField = new Field(userField);
-    console.log(this.userField);
     this.userField.draw(testGrid);
     this.compField = new Field(compField);
     this.compField.draw(testGrid);
@@ -32,7 +31,7 @@ Game.prototype.isOver = function() {
 };
 
 function Field(field) {
-
+console.log(field);
     // Создает игровое поле, которое представляет собой сетку из клеток
     // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
     // где y - у-координата клетки, х - х-координата, а i - тип клетки
@@ -43,7 +42,7 @@ function Field(field) {
 
     this.draw = function(grid) {
         for (var y=0; y < grid.length; y++) {
-            // console.log(field);
+            console.log(field);
             for (var x=0; x < grid[y].length; x++) {
                 var div = document.createElement('div');
                 div.className = y.toString()+'_'+x.toString()+' '+grid[y][x];
