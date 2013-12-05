@@ -29,16 +29,20 @@ Game.prototype.isOver = function() {
 
 var game = new Game(10, 10, human, machine);
 machine.addEventListener('click', game.compField.shoot);
+human.addEventListener('compShootEvent', game.userField.shoot);
 
 _.times(5, function() {
     console.log(game);
-    game.userField.compShoot();
+    human.dispatchEvent(game.userField.compShootEvent);
 });
 
 // while (!game.isOver()) {
 // }
 
 function Field(field) {
+    var htmlCollection = field.children;
+    var arr = Array.prototype.slice.call(htmlCollection);
+
     // Создает игровое поле, которое представляет собой сетку из клеток
     // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
     // где y - у-координата клетки, х - х-координата, а i - тип клетки
@@ -56,9 +60,22 @@ function Field(field) {
         }
     };
 
+    this.compShootEvent = new CustomEvent('compShootEvent', {
+        remaining : arr.reduce(function(acc, el, index) {
+            if ((el.className.indexOf(' p')==-1) || (el.className.indexOf(' x')==-1)) {
+                acc.push(index);
+                return acc;
+            }
+            else {
+                return acc;
+            }
+        }, []),
+
+        target : arr[_sample(remaining)],
+        bubbles : true
+    });
+
     this.compShoot = function() {
-        var htmlCollection = field.children;
-        var arr = Array.prototype.slice.call(htmlCollection);
         // собираем индексы еще не простреленных клеток
         var remaining = arr.reduce(function(acc, el, index) {
             if ((el.className.indexOf(' p')==-1) || (el.className.indexOf(' x')==-1)) {
@@ -89,8 +106,6 @@ function Field(field) {
 
     // Проверяет остались ли еще корабли
     this.check = function() {
-        var htmlCollection = field.children;
-        var arr = Array.prototype.slice.call(htmlCollection);
         return arr.some(function(el) {
             return (el.className.indexOf(' f') !== -1);
         });
