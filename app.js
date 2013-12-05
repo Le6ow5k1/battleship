@@ -1,4 +1,8 @@
+
 window.onload = function() {
+
+// var _ = require('lodash');
+
 var human = document.getElementById('usr');
 var machine = document.getElementById('comp');
 
@@ -28,6 +32,11 @@ Game.prototype.isOver = function() {
 var game = new Game(10, 10, human, machine);
 machine.addEventListener('click', game.compField.shoot);
 
+_.times(5, function() {
+    console.log(game);
+    game.userField.compShoot();
+});
+
 // while (!game.isOver()) {
 // }
 
@@ -49,6 +58,36 @@ function Field(field) {
         }
     };
 
+    this.compShoot = function() {
+        var htmlCollection = field.children;
+        var arr = Array.prototype.slice.call(htmlCollection);
+        // собираем индексы еще не простреленных клеток
+        var remaining = arr.reduce(function(acc, el, index) {
+            if ((el.className.indexOf(' p')==-1) || (el.className.indexOf(' x')==-1)) {
+                acc.push(index);
+                return acc;
+            }
+            else {
+                return acc;
+            }
+        }, []);
+
+        var targetIndex = _.sample(remaining);
+        var cell = arr[targetIndex];
+        switch (cell.className[4]) {
+            case 'f':
+                cell.className = replaceCharAt(cell.className, 4, 'x');
+                break;
+            case 'o':
+                cell.className = replaceCharAt(cell.className, 4, 'p');
+                break;
+            case 'n':
+                cell.className = replaceCharAt(cell.className, 4, 'p');
+                break;
+            default:
+                return 0;
+        }
+    };
 
     // Проверяет остались ли еще корабли
     this.check = function() {
