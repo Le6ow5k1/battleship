@@ -1,8 +1,8 @@
-var userField = document.getElementById('usr');
-var compField = document.getElementById('comp');
+window.onload = function() {
+var human = document.getElementById('usr');
+var machine = document.getElementById('comp');
 
-
-function Game(numRows, numCols) {
+function Game(numRows, numCols, user, comp) {
     var grid = new Grid(numRows, numCols);
     var testGrid = ['nnnnnnoonf',
                     'nffnfnoonn',
@@ -14,24 +14,24 @@ function Game(numRows, numCols) {
                     'nfnnnnnnnn',
                     'nnnonnnfno',
                     'oooonfnnno'];
-    console.log(grid);
 
-    this.userField = new Field(userField);
+    this.userField = new Field(user);
     this.userField.draw(testGrid);
-    this.compField = new Field(compField);
+    this.compField = new Field(comp);
     this.compField.draw(testGrid);
 }
 
-var game = new Game(10, 10);
-
-compField.addEventListener('click', game.compField.shoot);
-
 Game.prototype.isOver = function() {
-    return !(userField.check() || compField.check());
+    return !(this.userField.check() || this.compField.check());
 };
 
+var game = new Game(10, 10, human, machine);
+machine.addEventListener('click', game.compField.shoot);
+
+// while (!game.isOver()) {
+// }
+
 function Field(field) {
-console.log(field);
     // Создает игровое поле, которое представляет собой сетку из клеток
     // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
     // где y - у-координата клетки, х - х-координата, а i - тип клетки
@@ -39,10 +39,8 @@ console.log(field);
     //   'x' - поврежденная часть корабля
     //   'o' - свободная не простреленная клетка
     //   'p' - свободная простреленная клетка
-
     this.draw = function(grid) {
         for (var y=0; y < grid.length; y++) {
-            console.log(field);
             for (var x=0; x < grid[y].length; x++) {
                 var div = document.createElement('div');
                 div.className = y.toString()+'_'+x.toString()+' '+grid[y][x];
@@ -181,3 +179,4 @@ function findPlaceInRow(rowGrid, rowElem, start_indx) {
     }
     return false;
 }
+};

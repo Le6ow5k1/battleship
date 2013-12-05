@@ -9,10 +9,10 @@
 	width: 20px;
     height: 20px;
     float: left;
-    margin: 0px;
+
 }
-#usr {width: 220px; height: 220px; float: left;margin:30px;border: 1px solid black;}
-#comp {width: 220px; height: 220px;float: left;margin:30px;border: 1px solid black;}
+#usr {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid black;}
+#comp {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid black;}
 .main {width: 100%;}
 
 
