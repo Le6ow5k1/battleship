@@ -1,8 +1,6 @@
 
 window.onload = function() {
 
-// var _ = require('lodash');
-
 var human = document.getElementById('usr');
 var machine = document.getElementById('comp');
 
