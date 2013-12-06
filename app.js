@@ -1,11 +1,64 @@
-
 window.onload = function() {
 
-var human = document.getElementById('usr');
-var machine = document.getElementById('comp');
+    var human = document.getElementById('usr');
+    var machine = document.getElementById('comp');
+    // console.log(human);
 
-function Game(numRows, numCols, user, comp) {
-    var grid = new Grid(numRows, numCols);
+    // Эмитируем событие выстрела компьютером
+    var compEvent = new CustomEvent('compShoot', {
+        'view': window,
+        'bubbles': true,
+        'cancelable': true
+    });
+
+    function extend(Child, Parent) {
+        var F = function() { };
+        F.prototype = Parent.prototype;
+        Child.prototype = new F();
+        Child.prototype.constructor = Child;
+        Child.superclass = Parent.prototype;
+    }
+
+    extend(Player, Game);
+
+    var game = new Game();
+    // game.init();
+    machine.addEventListener('click', game.computer.field.shoot);
+    human.addEventListener('compShoot', game.player.field.shoot);
+    game.player.compShoot();
+
+function Game() {
+
+    this.player = new Player(human);
+    this.computer = new Player(machine);
+    console.log(this.computer.field.getHtml);
+
+    this.makeMove = function(currentPlayer, otherPlayer) {
+        if (currentPlayer.type == 'usr') {
+            var coord = prompt('Укажите координаты для выстрела');
+            console.log(coord);
+        }
+        else {
+            var cell = currentPlayer.compShoot;
+            console.log(cell);
+        }
+
+        if(!otherPlayer.isAlive()) {
+            console.log("The End");
+        } else {
+            this.makeMove(otherPlayer, currentPlayer);
+        }
+    };
+
+    this.init = function() {
+        var currentPlayer = this.player;
+        var otherPlayer = this.computer;
+
+        this.makeMove(this.player, this.computer);
+    };
+}
+
+function Player(type) {
     var testGrid = ['nnnnnnoonf',
                     'nffnfnoonn',
                     'nnnnfnnnnn',
@@ -17,31 +70,41 @@ function Game(numRows, numCols, user, comp) {
                     'nnnonnnfno',
                     'oooonfnnno'];
 
-    this.userField = new Field(user);
-    this.userField.draw(testGrid);
-    this.compField = new Field(comp);
-    this.compField.draw(testGrid);
+    this.type = type.id;
+
+    this.field = new Field(type, testGrid);
+    this.field.draw();
+
+    this.compShoot = function() {
+        var htmlCollection = this.field.getHtml.children;
+        var arr = Array.prototype.slice.call(htmlCollection);
+
+        // собираем индексы еще не простреленных клеток
+        var remaining = arr.reduce(function(acc, el, index) {
+            if ((el.className.indexOf('p')==-1) && (el.className.indexOf('x')==-1)) {
+                acc.push(index);
+                return acc;
+            }
+            else {
+                return acc;
+            }
+        }, []);
+
+        // Выбираем случайную клетку из оставшихся
+        var targetIndex = _.sample(remaining);
+        var target = arr[targetIndex];
+
+        // Запускаем событие клика по нужной нам клетке
+        target.dispatchEvent(compEvent);
+    };
+
+
+    this.isAlive = function() {
+        return this.field.check();
+    };
 }
 
-Game.prototype.isOver = function() {
-    return !(this.userField.check() || this.compField.check());
-};
-
-var game = new Game(10, 10, human, machine);
-machine.addEventListener('click', game.compField.shoot);
-human.addEventListener('compShootEvent', game.userField.shoot);
-
-_.times(5, function() {
-    console.log(game);
-    human.dispatchEvent(game.userField.compShootEvent);
-});
-
-// while (!game.isOver()) {
-// }
-
-function Field(field) {
-    var htmlCollection = field.children;
-    var arr = Array.prototype.slice.call(htmlCollection);
+function Field(field, grid) {
 
     // Создает игровое поле, которое представляет собой сетку из клеток
     // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
@@ -50,7 +113,7 @@ function Field(field) {
     //   'x' - поврежденная часть корабля
     //   'o' - свободная не простреленная клетка
     //   'p' - свободная простреленная клетка
-    this.draw = function(grid) {
+    this.draw = function() {
         for (var y=0; y < grid.length; y++) {
             for (var x=0; x < grid[y].length; x++) {
                 var div = document.createElement('div');
@@ -60,52 +123,12 @@ function Field(field) {
         }
     };
 
-    this.compShootEvent = new CustomEvent('compShootEvent', {
-        remaining : arr.reduce(function(acc, el, index) {
-            if ((el.className.indexOf(' p')==-1) || (el.className.indexOf(' x')==-1)) {
-                acc.push(index);
-                return acc;
-            }
-            else {
-                return acc;
-            }
-        }, []),
-
-        target : arr[_sample(remaining)],
-        bubbles : true
-    });
-
-    this.compShoot = function() {
-        // собираем индексы еще не простреленных клеток
-        var remaining = arr.reduce(function(acc, el, index) {
-            if ((el.className.indexOf(' p')==-1) || (el.className.indexOf(' x')==-1)) {
-                acc.push(index);
-                return acc;
-            }
-            else {
-                return acc;
-            }
-        }, []);
-
-        var targetIndex = _.sample(remaining);
-        var cell = arr[targetIndex];
-        switch (cell.className[4]) {
-            case 'f':
-                cell.className = replaceCharAt(cell.className, 4, 'x');
-                break;
-            case 'o':
-                cell.className = replaceCharAt(cell.className, 4, 'p');
-                break;
-            case 'n':
-                cell.className = replaceCharAt(cell.className, 4, 'p');
-                break;
-            default:
-                return 0;
-        }
-    };
+    this.getHtml = field;
 
     // Проверяет остались ли еще корабли
     this.check = function() {
+        var htmlCollection = field.children;
+        var arr = Array.prototype.slice.call(htmlCollection);
         return arr.some(function(el) {
             return (el.className.indexOf(' f') !== -1);
         });
@@ -115,6 +138,7 @@ function Field(field) {
     // Изменяет тип клетки
     this.shoot = function(event) {
         var cell = event.target;
+        console.log(event);
         switch (cell.className[4]) {
             case 'f':
                 cell.className = replaceCharAt(cell.className, 4, 'x');
@@ -126,10 +150,32 @@ function Field(field) {
                 cell.className = replaceCharAt(cell.className, 4, 'p');
                 break;
             default:
-                return 0;
+                break;
         }
+
+        if (!game.computer.isAlive()) {
+            alert('You win!');
+            machine.removeEventListener('click', game.computer.field.shoot);
+            human.removeEventListener('compShoot', game.player.field.shoot);
+        }
+        else {
+            if (event.type == 'click') {
+                // console.log(game.player.type);
+                // console.log(game.player.field.getHtml);
+                game.player.compShoot();
+            }
+        }
+        // else {
+        //     if (event.type)
+        // }
     };
 }
+
+function getAlert(text) {
+    return alert(text);
+}
+
+extend(Field, Player);
 
 function Grid(numRows, numCols) {
     var grid = new Array(numRows);
@@ -231,4 +277,5 @@ function findPlaceInRow(rowGrid, rowElem, start_indx) {
     }
     return false;
 }
+
 };
