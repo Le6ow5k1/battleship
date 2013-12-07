@@ -1,8 +1,7 @@
 window.onload = function() {
 
-    var human = document.getElementById('usr');
-    var machine = document.getElementById('comp');
-    // console.log(human);
+    var userField = document.getElementById('usr');
+    var computerField = document.getElementById('comp');
 
     // Эмитируем событие выстрела компьютером
     var compEvent = new CustomEvent('compShoot', {
@@ -11,51 +10,19 @@ window.onload = function() {
         'cancelable': true
     });
 
-    function extend(Child, Parent) {
-        var F = function() { };
-        F.prototype = Parent.prototype;
-        Child.prototype = new F();
-        Child.prototype.constructor = Child;
-        Child.superclass = Parent.prototype;
-    }
-
-    extend(Player, Game);
-
     var game = new Game();
-    // game.init();
-    machine.addEventListener('click', game.computer.field.shoot);
-    human.addEventListener('compShoot', game.player.field.shoot);
-    game.player.compShoot();
+    game.init();
 
 function Game() {
 
-    this.player = new Player(human);
-    this.computer = new Player(machine);
-    console.log(this.computer.field.getHtml);
-
-    this.makeMove = function(currentPlayer, otherPlayer) {
-        if (currentPlayer.type == 'usr') {
-            var coord = prompt('Укажите координаты для выстрела');
-            console.log(coord);
-        }
-        else {
-            var cell = currentPlayer.compShoot;
-            console.log(cell);
-        }
-
-        if(!otherPlayer.isAlive()) {
-            console.log("The End");
-        } else {
-            this.makeMove(otherPlayer, currentPlayer);
-        }
-    };
+    this.player = new Player(userField);
+    this.computer = new Player(computerField);
 
     this.init = function() {
-        var currentPlayer = this.player;
-        var otherPlayer = this.computer;
-
-        this.makeMove(this.player, this.computer);
+        computerField.addEventListener('click', game.computer.field.shoot);
+        userField.addEventListener('compShoot', game.player.field.shoot);
     };
+
 }
 
 function Player(type) {
@@ -75,44 +42,44 @@ function Player(type) {
     this.field = new Field(type, testGrid);
     this.field.draw();
 
-    this.compShoot = function() {
-        var htmlCollection = this.field.getHtml.children;
-        var arr = Array.prototype.slice.call(htmlCollection);
-
-        // собираем индексы еще не простреленных клеток
-        var remaining = arr.reduce(function(acc, el, index) {
-            if ((el.className.indexOf('p')==-1) && (el.className.indexOf('x')==-1)) {
-                acc.push(index);
-                return acc;
-            }
-            else {
-                return acc;
-            }
-        }, []);
-
-        // Выбираем случайную клетку из оставшихся
-        var targetIndex = _.sample(remaining);
-        var target = arr[targetIndex];
-
-        // Запускаем событие клика по нужной нам клетке
-        target.dispatchEvent(compEvent);
-    };
-
-
     this.isAlive = function() {
         return this.field.check();
     };
 }
 
-function Field(field, grid) {
+compShoot = function() {
+    var htmlCollection = game.player.field.getHtml.children;
+    var arr = Array.prototype.slice.call(htmlCollection);
 
-    // Создает игровое поле, которое представляет собой сетку из клеток
-    // клетка-это div элемент, с соответствующим именем класса вида <y_x i>
-    // где y - у-координата клетки, х - х-координата, а i - тип клетки
-    //   'f' - неповрежденная часть корабля
-    //   'x' - поврежденная часть корабля
-    //   'o' - свободная не простреленная клетка
-    //   'p' - свободная простреленная клетка
+    // собираем индексы еще не простреленных клеток
+    var remaining = arr.reduce(function(acc, el, index) {
+        if ((el.className.indexOf('p')==-1) && (el.className.indexOf('x')==-1)) {
+            acc.push(index);
+            return acc;
+        }
+        else {
+            return acc;
+        }
+    }, []);
+
+    // Выбираем случайную клетку из оставшихся
+    var targetIndex = _.sample(remaining);
+    var target = arr[targetIndex];
+
+    target.dispatchEvent(compEvent);
+
+    computerField.addEventListener('click', game.computer.field.shoot);
+};
+
+
+function Field(field, grid) {
+    /*Создает игровое поле, которое представляет собой сетку из клеток
+    клетка-это div элемент, с соответствующим именем класса вида <y_x i>
+    где y - у-координата клетки, х - х-координата, а i - тип клетки
+      'f' - неповрежденная часть корабля
+      'x' - поврежденная часть корабля
+      'o' - свободная не простреленная клетка
+      'p' - свободная простреленная клетка*/
     this.draw = function() {
         for (var y=0; y < grid.length; y++) {
             for (var x=0; x < grid[y].length; x++) {
@@ -134,8 +101,8 @@ function Field(field, grid) {
         });
     };
 
-    // Обработчик события по клику на определенную клетку
-    // Изменяет тип клетки
+    /*Обработчик события по клику на определенную клетку
+      Изменяет тип клетки*/
     this.shoot = function(event) {
         var cell = event.target;
         console.log(event);
@@ -153,16 +120,23 @@ function Field(field, grid) {
                 break;
         }
 
+        computerField.removeEventListener('click', game.computer.field.shoot);
+
         if (!game.computer.isAlive()) {
-            alert('You win!');
-            machine.removeEventListener('click', game.computer.field.shoot);
-            human.removeEventListener('compShoot', game.player.field.shoot);
+            var retVal = confirm('Вы выйграли!\n\nХотите сыграть снова?');
+            if (retVal) {
+                location.reload();
+            }
+            else {
+                computerField.removeEventListener('click', game.computer.field.shoot);
+                userField.removeEventListener('compShoot', game.player.field.shoot);
+            }
         }
         else {
             if (event.type == 'click') {
-                // console.log(game.player.type);
-                // console.log(game.player.field.getHtml);
-                game.player.compShoot();
+                var notification = document.getElementById('notif');
+                notification.textContent = 'Компьютер думает!';
+                window.setTimeout(compShoot, 1500);
             }
         }
         // else {
@@ -170,12 +144,6 @@ function Field(field, grid) {
         // }
     };
 }
-
-function getAlert(text) {
-    return alert(text);
-}
-
-extend(Field, Player);
 
 function Grid(numRows, numCols) {
     var grid = new Array(numRows);
@@ -187,51 +155,53 @@ function Grid(numRows, numCols) {
         grid[y] = row;
     }
 
-    return grid;
+    this.get = function() {
+        return grid;
+    };
 }
 
 // Все возможные корабли
-function Elements() {
-    // Здесь f-часть корабля, n-место вокруг корабля, о-пустое место
-    this.single = [['nnn','nfn','nnn']];
-    this.twos = [['nnnn','nffn','nnnn'], ['nnn','nfn','nfn','nnn']];
-    this.threes = [['nnnnn','nfffn','nnnnn'], ['nnn','nfn','nfn','nfn','nnn'], ['nnnn','nffn','nfnn','nnnn'],
-                 ['nnnn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','nnnn'], ['nnnn','nfnn','nffn','nnnn']];
-    this.fours = [['nnnnnn','nffffn','nnnnnn'], ['nnn','nfn','nfn','nfn','nfn','nnn'], ['nnnnn','nfffn','nfnnn'],
-                 ['nnnnn','nfffn','nnnfn'], ['nnnnn','nnnfn','nfffn'],['nnnnn','nfnnn','nfffn'], ['nnnn','nffn','nffn','nnnn'],
-                 ['nnno','nfno','nfnn','nffn','nnnn'], ['onnn','onfn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','onfn','onnn'],
-                 ['nnnn','nffn','nfnn','nfno','nnno']];
+// Здесь f-часть корабля, n-место вокруг корабля, о-пустое место
+var SINGLE = [['nnn','nfn','nnn']];
+var TWOS = [['nnnn','nffn','nnnn'], ['nnn','nfn','nfn','nnn']];
+var THREES = [['nnnnn','nfffn','nnnnn'], ['nnn','nfn','nfn','nfn','nnn'], ['nnnn','nffn','nfnn','nnnn'],
+             ['nnnn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','nnnn'], ['nnnn','nfnn','nffn','nnnn']];
+var FOURS = [['nnnnnn','nffffn','nnnnnn'], ['nnn','nfn','nfn','nfn','nfn','nnn'], ['nnnnn','nfffn','nfnnn'],
+             ['nnnnn','nfffn','nnnfn'], ['nnnnn','nnnfn','nfffn'],['nnnnn','nfnnn','nfffn'], ['nnnn','nffn','nffn','nnnn'],
+             ['nnno','nfno','nfnn','nffn','nnnn'], ['onnn','onfn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','onfn','onnn'],
+             ['nnnn','nffn','nfnn','nfno','nnno']];
 
 
+
+
+function getSingles() {
+    var res = [null,null,null,null];
+    return res.forEach(function(el) { return SINGLE[0]; });
 }
 
-Elements.prototype.getSingles = function() {
-    var res = [null,null,null,null];
-    return res.forEach(function(el) { return this.single[0]; });
-};
-
-Elements.prototype.getTwos = function() {
+function getTwos() {
     var res = [null,null,null];
     var max = this.twos.length - 1;
     return res.forEach(function(el) {
         var randIndx = randomInt(0, max);
-        return res.forEach(function() { return this.twos[randIndx]; });
+        return res.forEach(function() { return TWOS[randIndx]; });
     });
-};
+}
 
-Elements.prototype.getThrees = function() {
+function getThrees() {
     var res = [null,null];
     var max = this.threes.length - 1;
     return res.forEach(function(el) {
         var randIndx = randomInt(0, max);
-        return res.forEach(function() { return this.twos[randIndx]; });
+        return res.forEach(function() { return THREES[randIndx]; });
     });
-};
-Elements.prototype.getFours = function() {
+}
+
+function getFours() {
     var max = this.fours.length - 1;
     var randIndx = randomInt(0, max);
-    return [this.fours[randIndx]];
-};
+    return [FOURS[randIndx]];
+}
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max-min+1) + min);
@@ -241,8 +211,8 @@ function replaceCharAt(str, index, character) {
     return str.substr(0, index) + character + str.substr(index+character.length);
 }
 
-// Находит место для расположения корабля и возвращает x,y координаты начальной точки
-// для "вставки" данного корабля
+/*Находит место для расположения корабля и возвращает x,y координаты начальной точки
+для "вставки" данного корабля*/
 function findPlaceForShip(grid, elem) {
     var start_indx = null;
 
@@ -259,9 +229,9 @@ function findPlaceForShip(grid, elem) {
     return false;
 }
 
-// Определяет есть ли в строке сетки место для расположения "строчки" данного корабля,
-// если есть, то функция возвращяет индекс с которого начинается свободное место, иначе false.
-// Можно указать индекс с которого начинать проверку - start_indx.
+/*Определяет есть ли в строке сетки место для расположения "строчки" данного корабля,
+если есть, то функция возвращяет индекс с которого начинается свободное место, иначе false.
+Можно указать индекс с которого начинать проверку - start_indx.*/
 function findPlaceInRow(rowGrid, rowElem, start_indx) {
     var start = 0;
     if (start_indx) { start = start_indx; }
