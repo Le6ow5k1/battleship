@@ -1,19 +1,46 @@
-.s { border: 1px solid black; }
-.o { border: 1px solid black; }
-.p { border: 1px solid black; background-color: aqua;}
-.x { border: 1px solid black; background-color: lime;}
-.f { border: 1px solid black; background-color: grey;}
-.n { border: 1px solid black;}
+.s {  }
+.o {  }
+.p {  }
+.p:after {
+	position: relative;
+	bottom: 0px;
+	left: 4px;
+	content: "\25cf";
+	font-size: 20px;
+	font-family:"Times New Roman", Times, serif;
+	color: black;
+	text-align: center;
+ }
+.x { background-color: lightgrey; }
+.x:after {
+	position: relative;
+	bottom: 2px;
+	left: 3px;
+	content: "\d7";
+	font-size: 24px;
+	font-family:"Times New Roman", Times, serif;
+	color: black;
+	text-align: center;
+}
+.f { background-color: lightgrey; }
+.n { }
 
 .field div {
+	border: 1px solid grey;
 	width: 20px;
     height: 20px;
     float: left;
 }
 
-#usr {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid black;}
-#comp {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid black;}
-.main {width: 570px;}
+div#comp.field div.f {
+	background-color: white;
+	border: 1px solid grey;
+}
+
+#usr {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid grey;}
+#comp {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid grey;}
+.main {width: 570px; margin: auto;}
 
 
 
+/*html body div.main div#comp.field div.1_1*/
