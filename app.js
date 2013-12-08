@@ -34,7 +34,7 @@ var opts = {
       className: 'spinner', // The CSS class to assign to the spinner
       zIndex: 2e9, // The z-index (defaults to 2000000000)
       top: 89, // Top position relative to parent in px
-      left: 241 // Left position relative to parent in px
+      left: 211 // Left position relative to parent in px
 };
 var spinner = new Spinner(opts);
 

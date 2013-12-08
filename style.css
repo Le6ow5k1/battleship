@@ -1,46 +1,61 @@
-.s {  }
-.o {  }
-.p {  }
+.s { }
+.o { }
+.p { }
+.n { }
 .p:after {
 	position: relative;
-	bottom: 0px;
-	left: 4px;
+	bottom: 3px;
+	left: 0px;
 	content: "\25cf";
 	font-size: 20px;
 	font-family:"Times New Roman", Times, serif;
 	color: black;
 	text-align: center;
  }
-.x { background-color: lightgrey; }
+.x {
+	background-color: lightgrey;
+}
 .x:after {
 	position: relative;
 	bottom: 2px;
-	left: 3px;
+	left: 0px;
 	content: "\d7";
 	font-size: 24px;
 	font-family:"Times New Roman", Times, serif;
 	color: black;
 	text-align: center;
 }
-.f { background-color: lightgrey; }
-.n { }
-
+.f {
+	background-color: lightgrey;
+}
 .field div {
 	border: 1px solid grey;
 	width: 20px;
     height: 20px;
     float: left;
 }
-
 div#comp.field div.f {
 	background-color: white;
 	border: 1px solid grey;
 }
-
-#usr {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid grey;}
-#comp {width: 220px; height: 220px; float: left;margin:30px; border: 1px solid grey;}
-.main {width: 570px; margin: auto;}
-
-
-
-/*html body div.main div#comp.field div.1_1*/
+#usr,#comp {
+	width: 220px;
+	height: 220px;
+	position: relative;
+	left: 14px;
+	top: 10px;
+	border: 1px solid grey;
+}
+.outer {
+	width: 250px;
+	height: 250px;
+    float: left;
+    position: relative;
+    font-family: "Times New Roman",Times,serif;
+    font-size: 22px;
+    text-align: center;
+}
+.main {
+	width: 630px;
+	margin: auto;
+}
