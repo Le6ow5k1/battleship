@@ -34,46 +34,9 @@ var opts = {
       className: 'spinner', // The CSS class to assign to the spinner
       zIndex: 2e9, // The z-index (defaults to 2000000000)
       top: 89, // Top position relative to parent in px
-      left: 211 // Left position relative to parent in px
+      left: 209 // Left position relative to parent in px
 };
 var spinner = new Spinner(opts);
-
-/*
-***Говнокод***
-TODO сделать генератор случайного расположения кораблей
-*/
-var grids = [
-    ['ooofooooof',
-     'ooooooooof',
-     'foooooffoo',
-     'oooooofooo',
-     'oooooofoof',
-     'offfooooff',
-     'ooooofoooo',
-     'ffofoooooo',
-     'ooofoooooo',
-     'fooooooooo'],
-    ['ooooooofof',
-     'ooffffofoo',
-     'ooooooofoo',
-     'ofoooooooo',
-     'oooofooffo',
-     'oooofooooo',
-     'oooooooffo',
-     'foofoooooo',
-     'oooooooffo',
-     'ooooooofoo'],
-    ['oooooooooo',
-     'oofooooffo',
-     'oooooooooo',
-     'offoofoofo',
-     'offooooooo',
-     'ooooooofoo',
-     'foofooofoo',
-     'foofooofoo',
-     'oooooooooo',
-     'oooofffoof']
-];
 
 var game = new Game();
 game.init();
@@ -137,7 +100,7 @@ function Game() {
         // Выбираем случайную клетку из оставшихся
         var targetIndex = _.sample(remaining);
         var target = arr[targetIndex];
-
+        // Стреляем по ней
         target.dispatchEvent(compEvent);
 
         /*После того, как ход сделан убираем спиннер
@@ -162,8 +125,9 @@ function Player(type) {
 
 
 function Field(field) {
-    randI = randomInt(0, grids.length-1);
-    grid = grids.splice(randI,1)[0];
+    var ships = new Ships().get();
+    grid = new Grid(10, 10, ships).get();
+    console.log(grid);
 
     /*Создает игровое поле, которое представляет собой сетку из клеток
     клетка-это div элемент, с соответствующим именем класса вида <y_x i>
@@ -235,7 +199,7 @@ function Field(field) {
     };
 }
 
-function Grid(numRows, numCols) {
+function Grid(numRows, numCols, ships) {
     var grid = new Array(numRows);
     for (var y=0; y < numRows; y++) {
         var row = [];
@@ -245,50 +209,87 @@ function Grid(numRows, numCols) {
         grid[y] = row;
     }
 
+
     this.get = function() {
+        this.placeAll();
         return grid;
     };
 
-    var ships = new Ships().get();
-    // var ships = a.get();
-
-    /*Находит место для расположения корабля и возвращает x,y координаты начальной точки
-    для "вставки" данного корабля. Можно указать y координату с которой начинать проверку - start_i.*/
-    function findPlaceForShip(ship, start_i) {
-        var start_j = null;
-        var start = 0;
-        if (start_i) { start = start_i; }
-
-        for (var i=start; i < grid.length-ship.length+1; i++) {
-            for (var j=0; j < ship.length; j++) {
-                start_j = findPlaceInRow(grid[i+j],ship[j], start_j);
-                if (start_j===false) {
-                    continue;
-                }
+    function canPlaceCell(y, x) {
+        // Если координаты выходят за пределы сетки
+        if (y < 0 || y > grid.length-1) {
+            return false;
+        } else {
+            if (x < 0 || x > grid[y].length-1) {
+                return false;
             }
-            return [i, start_j];
         }
-        return false;
+        // Если координаты не на краях сетки
+        if (y > 0 && y < grid.length-1 && x > 0 && x < grid[y].length-1) {
+            return (grid[y][x]!='f')&&(grid[y-1][x]!='f')&&(grid[y-1][x+1]!='f')&&(grid[y-1][x-1]!='f')&&(grid[y][x-1]!='f')&&
+            (grid[y][x+1]!='f')&&(grid[y+1][x+1]!='f')&&(grid[y+1][x]!='f')&&(grid[y+1][x-1]!='f');
+        }
+        // Если на краях
+        else {
+            // верхняя граница
+            if (y == 0) {
+                return (grid[y][x]!='f')&&(grid[y+1][x]!='f')&&(grid[y+1][x+1]!='f')&&(grid[y+1][x-1]!='f')&&
+                (grid[y][x-1]!='f')&&(grid[y][x+1]!='f');
+            }
+            // нижняя граница
+            if (y == grid.length-1) {
+                return (grid[y][x]!='f')&&(grid[y-1][x]!='f')&&(grid[y-1][x+1]!='f')&&(grid[y-1][x-1]!='f')&&
+                (grid[y][x-1]!='f')&&(grid[y][x+1]!='f');
+            }
+            // левая граница
+            if (x == 0) {
+                return (grid[y][x]!='f')&&(grid[y][x+1]!='f')&&(grid[y+1][x+1]!='f')&&(grid[y-1][x+1]!='f')&&
+                (grid[y-1][x]!='f')&&(grid[y+1][x]!='f');
+            }
+            // правая граница
+            if (x == grid[y].length-1) {
+                return (grid[y][x]!='f')&&(grid[y][x-1]!='f')&&(grid[y-1][x-1]!='f')&&(grid[y+1][x-1]!='f')&&
+                (grid[y-1][x]!='f')&&(grid[y+1][x]!='f');
+            }
+        }
     }
 
+    this.placeAll = function() {
+        var places = [];
+        _.each(ships, function(ship) {
+            places = allPlaces(ship);
+            var coord = _.sample(places);
+            placeShip(coord[0], coord[1], ship);
+        });
+    };
 
+    function canPlaceShip(y, x, ship) {
+        var can = true;
+        var yGrid, yShip;
+        for (yGrid=y, yShip=0; yShip < ship.length; yGrid++, yShip++) {
+            var xGrid, xShip;
+            for (xGrid=x, xShip=0; xShip < ship[yShip].length; xGrid++, xShip++) {
+                // Только если каждую клетку корабля можно расположить
+                can = can && canPlaceCell(yGrid, xGrid, ship[yShip][xShip]);
+            }
+        }
+        return can;
+    }
 
-    /*Определяет есть ли в строке сетки место для расположения "строчки" данного корабля,
-    если есть, то функция возвращяет индекс с которого начинается свободное место, иначе false.
-    Можно указать индекс с которого начинать проверку - start_j.*/
-    function findPlaceInRow(rowGrid, rowShip, start_j) {
-        var start = 0;
-        if (start_j) { start = start_j; }
-
-        for (var i=start; i < rowGrid.length-rowShip.length+1; i++) {
-            for (var j=0; j < rowShip.length; j++) {
-                if ((rowGrid[i+j] !== 'o')&&(i!==0||i!==9)&&(j!==0||j!==9)) {
-                    continue;
+    // Возвращает массив координат возможных положений корабля
+    function allPlaces(ship) {
+        return grid.reduce(function(acc, row, y) {
+            var innerAcc = [];
+            var coord = [];
+            for (var x = 0; x < row.length; x++) {
+                if (canPlaceShip(y, x, ship)) {
+                    coord = [y,x];
+                    innerAcc.push(coord);
                 }
             }
-            return i;
-        }
-        return false;
+            var res = acc.concat(innerAcc);
+            return res;
+        }, []);
     }
 
     function placeShip(yStart, xStart, ship) {
@@ -296,31 +297,18 @@ function Grid(numRows, numCols) {
         for (yGrid=yStart, yShip=0; yShip < ship.length; yGrid++, yShip++) {
             var xGrid, xShip;
             for (xGrid=xStart, xShip=0; xShip < ship[yShip].length; xGrid++, xShip++) {
-                var cell = grid[yGrid][xGrid];
                 grid[yGrid][xGrid] = ship[yShip][xShip];
             }
         }
     }
-
-    this.fill = function() {
-        for (var s=0; s < ships.length; s++) {
-            var coord = findPlaceForShip(ships[s]);
-            if (coord) {
-                placeShip(coord[0], coord[1], ships[s]);
-            }
-        }
-    };
 }
 
 function Ships() {
-    var SINGLE = [['nnn','nfn','nnn']];
-    var TWOS = [['nnnn','nffn','nnnn'], ['nnn','nfn','nfn','nnn']];
-    var THREES = [['nnnnn','nfffn','nnnnn'], ['nnn','nfn','nfn','nfn','nnn'], ['nnnn','nffn','nfnn','nnnn'],
-                 ['nnnn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','nnnn'], ['nnnn','nfnn','nffn','nnnn']];
-    var FOURS = [['nnnnnn','nffffn','nnnnnn'], ['nnn','nfn','nfn','nfn','nfn','nnn'], ['nnnnn','nfffn','nfnnn'],
-                 ['nnnnn','nfffn','nnnfn'], ['nnnnn','nnnfn','nfffn'],['nnnnn','nfnnn','nfffn'], ['nnnn','nffn','nffn','nnnn'],
-                 ['nnno','nfno','nfnn','nffn','nnnn'], ['onnn','onfn','nnfn','nffn','nnnn'], ['nnnn','nffn','nnfn','onfn','onnn'],
-                 ['nnnn','nffn','nfnn','nfno','nnno']];
+    var SINGLE = [['f']];
+    var TWOS = [['ff'], ['f','f']];
+    var THREES = [['fff'], ['f','f','f'], ['ff','of'], ['of','ff'], ['ff','of'], ['fo','ff']];
+    var FOURS = [['ffff'], ['f','f','f','f'], ['fff','foo'], ['fff','oof'], ['oof','fff'], ['foo','fff'], ['ff','ff'],
+                 ['fo','fo','ff'], ['of','of','ff'], ['ff','of','of'], ['ffn','fo','fo']];
 
     function getSingles() {
         var res = [null,null,null,null];
@@ -352,10 +340,8 @@ function Ships() {
     }
 
     this.get = function() {
-        var ships = getSingles().concat(getTwos()).concat(getThrees()).concat(getFours());
-        return _.shuffle(ships);
+        var ships = getFours().concat(getThrees()).concat(getTwos()).concat(getSingles());
+        return ships;
     };
-
 }
-
 };
