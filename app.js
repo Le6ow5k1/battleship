@@ -308,7 +308,8 @@ function Ships() {
     var TWOS = [['ff'], ['f','f']];
     var THREES = [['fff'], ['f','f','f'], ['ff','of'], ['of','ff'], ['ff','of'], ['fo','ff']];
     var FOURS = [['ffff'], ['f','f','f','f'], ['fff','foo'], ['fff','oof'], ['oof','fff'], ['foo','fff'], ['ff','ff'],
-                 ['fo','fo','ff'], ['of','of','ff'], ['ff','of','of'], ['ffn','fo','fo']];
+                 ['fo','fo','ff'], ['of','of','ff'], ['ff','of','of'], ['ffn','fo','fo'], ['fff','ofo'], ['ofo','fff'],
+                 ['of','ff','of'], ['fo','ff','fo'], ['ffo','off'], ['off','ffo'], ['of','ff','fo'], ['fo','ff','of']];
 
     function getSingles() {
         var res = [null,null,null,null];
